@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-
 //Create a typedef defining a simple function pointer
 //to be used for LED's
 typedef void (*GPIOFunc)(void);
@@ -14,9 +13,10 @@ typedef struct
 {
 	const GPIOFunc On;
 	const GPIOFunc Off;
-}LED;
+	const GPIOFunc Toggle;
+} LED;
 
-uint_fast8_t ReadPushButton( void );
+uint_fast8_t ReadPushButton(void);
 
 extern LED BlueLed;
 extern LED GreenLed;

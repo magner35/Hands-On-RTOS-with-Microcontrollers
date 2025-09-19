@@ -50,7 +50,6 @@ void Task1(void *argument)
 	  vTaskDelay(105/ portTICK_PERIOD_MS);
 	  GreenLed.Off();
 	  vTaskDelay(100/ portTICK_PERIOD_MS);
-  //test for git
   }
 }
 

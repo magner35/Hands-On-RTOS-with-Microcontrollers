@@ -8,14 +8,17 @@
 
 void GreenOn ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);}
 void GreenOff ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);}
-LED GreenLed = { GreenOn, GreenOff };
+void GreenToggle ( void ) {HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);}
+LED GreenLed = { GreenOn, GreenOff, GreenToggle };
 
 void BlueOn ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET);}
 void BlueOff ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);}
-LED BlueLed = { BlueOn, BlueOff };
+void BlueToggle ( void ) {HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);}
+LED BlueLed = { BlueOn, BlueOff, BlueToggle };
 
 void RedOn ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);}
 void RedOff ( void ) {HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);}
-LED RedLed = { RedOn, RedOff };
+void RedToggle ( void ) {HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);}
+LED RedLed = { RedOn, RedOff, RedToggle };
 
 uint_fast8_t ReadPushButton( void ){ return HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);}
