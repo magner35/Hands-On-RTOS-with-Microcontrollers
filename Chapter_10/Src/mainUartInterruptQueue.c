@@ -42,14 +42,13 @@
  * based interrupt driven UART driver
  *********************************************/
 
-
 // some common variables to use for each task
 // 128 * 4 = 512 bytes
 //(recommended min stack size per task)
 #define STACK_SIZE 128
-#define BAUDRATE 256400
-void uartPrintOutTask( void* NotUsed);
-void startUart4Traffic( TimerHandle_t xTimer );
+#define BAUDRATE 9600
+void uartPrintOutTask(void *NotUsed);
+void startUart4Traffic(TimerHandle_t xTimer);
 
 static QueueHandle_t uart2_BytesReceived = NULL;
 
@@ -69,12 +68,7 @@ int main(void)
 	//block-based buffer for receiving data - the transmission
 	//needs to start after the receiver is ready for data for the
 	//strings to start in the correct position in this simple setup
-	TimerHandle_t oneShotHandle =
-	xTimerCreate(	"startUart4Traffic",
-					5000 /portTICK_PERIOD_MS,
-					pdFALSE,
-					NULL,
-					startUart4Traffic);
+	TimerHandle_t oneShotHandle = xTimerCreate("startUart4Traffic", 1000 / portTICK_PERIOD_MS, pdFALSE, NULL, startUart4Traffic);
 	assert_param(oneShotHandle != NULL);
 	xTimerStart(oneShotHandle, 0);
 
@@ -88,7 +82,7 @@ int main(void)
 	vTaskStartScheduler();
 
 	//if you've wound up here, there is likely an issue with overrunning the freeRTOS heap
-	while(1)
+	while (1)
 	{
 	}
 }
@@ -97,7 +91,7 @@ int main(void)
  * Start an interrupt driven receive.  This particular ISR is hard-coded
  * to push characters into a queue
  */
-void startReceiveInt( void )
+void startReceiveInt(void)
 {
 	rxInProgress = true;
 	USART2->CR3 |= USART_CR3_EIE;	//enable error interrupts
@@ -107,50 +101,44 @@ void startReceiveInt( void )
 	NVIC_EnableIRQ(USART2_IRQn);
 }
 
-void startUart4Traffic( TimerHandle_t xTimer )
+void startUart4Traffic(TimerHandle_t xTimer)
 {
 	SetupUart4ExternalSim(BAUDRATE);
 }
 
-void uartPrintOutTask( void* NotUsed)
+void uartPrintOutTask(void *NotUsed)
 {
 	char nextByte;
 	STM_UartInit(USART2, BAUDRATE, NULL, NULL);
 	startReceiveInt();
 
-	while(1)
+	while (1)
 	{
 		xQueueReceive(uart2_BytesReceived, &nextByte, portMAX_DELAY);
 		SEGGER_SYSVIEW_PrintfHost("%c", nextByte);
 	}
 }
 
-void USART2_IRQHandler( void )
+void USART2_IRQHandler(void)
 {
 	portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 	SEGGER_SYSVIEW_RecordEnterISR();
 
 	//first check for errors
-	if(	USART2->ISR & (	USART_ISR_ORE_Msk |
-						USART_ISR_NE_Msk |
-						USART_ISR_FE_Msk |
-						USART_ISR_PE_Msk ))
+	if ( USART2->ISR & ( USART_ISR_ORE_Msk | USART_ISR_NE_Msk | USART_ISR_FE_Msk | USART_ISR_PE_Msk))
 	{
 		//clear error flags
-		USART2->ICR |= (USART_ICR_FECF |
-						USART_ICR_PECF |
-						USART_ICR_NCF |
-						USART_ICR_ORECF);
+		USART2->ICR |= (USART_ICR_FECF | USART_ICR_PECF | USART_ICR_NCF | USART_ICR_ORECF);
 	}
 
-	if(	USART2->ISR & USART_ISR_RXNE_Msk)
+	if ( USART2->ISR & USART_ISR_RXNE_Msk)
 	{
 		//read the data register unconditionally to clear
 		//the receive not empty interrupt if no reception is
 		//in progress
 		uint8_t tempVal = (uint8_t) USART2->RDR;
 
-		if(rxInProgress)
+		if (rxInProgress)
 		{
 			xQueueSendFromISR(uart2_BytesReceived, &tempVal, &xHigherPriorityTaskWoken);
 		}
